@@ -18,7 +18,7 @@
 
 * Flour
 * Cheese
-* Tomatoes
+* Tomatoes.
 
 
 7 
