@@ -15,9 +15,11 @@
 >
 
 6. 
+
 * Flour
 * Cheese
 * Tomatoes
+
 
 7. We pictured the meek mild creatures where  
 They dwelt in their strawy pen,  
