@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Function Plotter</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        h1 {
+            text-align: center;
+        }
+        form {
+            margin-bottom: 20px;
+        }
+        canvas {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        label {
+            display: inline-block;
+            width: 150px;
+            margin-bottom: 10px;
+        }
+        input {
+            margin-bottom: 10px;
+        }
+        button {
+            display: block;
+            margin-top: 10px;
+        }
+        pre {
+            background-color: #f4f4f4;
+            padding: 10px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>Function Plotter</h1>
+    <form id="functionForm">
+        <label for="functionInput">Function:</label>
+        <input type="text" id="functionInput" placeholder="e.g., x*x or sin(x)/x" required><br>
+
+        <label for="startInput">Start of x range:</label>
+        <input type="number" id="startInput" value="0" step="any" required><br>
+
+        <label for="endInput">End of x range:</label>
+        <input type="number" id="endInput" value="10" step="any" required><br>
+
+        <label for="stepInput">x Step:</label>
+        <input type="number" id="stepInput" value="1" step="any" min="0.01" required><br>
+
+        <label for="yScaleInput">Y Scale Factor:</label>
+        <input type="number" id="yScaleInput" value="1" step="any" required><br>
+
+        <button type="button" onclick="calculateAndPlot()">Calculate & Plot</button>
+    </form>
+
+    <h2>Calculated Values</h2>
+    <pre id="output"></pre>
+
+    <h2>Graph</h2>
+    <canvas id="chartCanvas"></canvas>
+
+    <script>
+        let chartInstance = null;
+
+        function calculateAndPlot() {
+            const funcInput = document.getElementById('functionInput').value;
+            const xStart = parseFloat(document.getElementById('startInput').value);
+            const xEnd = parseFloat(document.getElementById('endInput').value);
+            const xStep = parseFloat(document.getElementById('stepInput').value);
+            const yScale = parseFloat(document.getElementById('yScaleInput').value);
+            const outputField = document.getElementById('output');
+
+            // Input validation
+            if (xStart >= xEnd || xStep <= 0) {
+                alert('Invalid input: Ensure start < end and step > 0.');
+                return;
+            }
+
+            let xValues = [];
+            let yValues = [];
+            let outputText = '';
+
+            try {
+                with (Math) { // Allow Math functions without prefix
+                    for (let x = xStart; x <= xEnd; x += xStep) {
+                        let y;
+                        try {
+                            y = eval(funcInput.replace(/x/g, `(${x})`)) * yScale;
+                        } catch (e) {
+                            throw new Error(`Invalid function at x = ${x}`);
+                        }
+                        xValues.push(x);
+                        yValues.push(y);
+                        outputText += `f(${x.toFixed(2)}) = ${y.toFixed(2)}\n`;
+                    }
+                }
+            } catch (error) {
+                alert('Error: ' + error.message);
+                return;
+            }
+
+            // Output calculated values
+            outputField.textContent = outputText;
+
+            // Plot graph using Chart.js
+            plotChart(xValues, yValues);
+        }
+
+        function plotChart(xValues, yValues) {
+            const ctx = document.getElementById('chartCanvas').getContext('2d');
+            if (chartInstance) {
+                chartInstance.destroy(); // Clear previous chart
+            }
+            chartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: xValues.map(x => x.toFixed(2)),
+                    datasets: [{
+                        label: 'f(x)',
+                        data: yValues,
+                        borderWidth: 2,
+                        fill: false,
+                        borderColor: 'blue',
+                        pointRadius: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'x values'
+                            }
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'f(x) values'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+    </script>
+</body>
+</html>
